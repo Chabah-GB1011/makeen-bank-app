@@ -8,29 +8,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential ccache git libffi-dev libssl-dev python3-dev zip unzip openjdk-17-jdk
-        pip install --upgrade pip
-        pip install buildozer cython
+      - name: Build with Buildozer Action
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: android debug
+          workdir: .
 
-    - name: Build APK with Buildozer
-      run: |
-        buildozer android debug
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: MakeenBank-APK
-        path: bin/*.apk
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: MakeenBank-APK
+          path: bin/*.apk
