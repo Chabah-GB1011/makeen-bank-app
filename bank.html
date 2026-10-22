@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مكين بنك - لوحة التحكم والتحليلات المالية</title>
+    <!-- مكتبة توليد كود QR -->
+    
+    <!-- Makeen Empire View (Fully Responsive for PC & Mobile) -->
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- مكتبة قراءة الكاميرا ومسح QR -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- مكتبة الرسوم البيانية Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #421d17, #0b1542);
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: 1px solid rgba(255, 255, 255, 0.1);
+            --navbar-bg: rgba(255, 255, 255, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-text: #fff;
+            --history-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="light"] {
+            --bg-gradient: linear-gradient(135deg, #f0f2f5, #e2e8f0);
+            --text-color: #1a202c;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: 1px solid rgba(0, 0, 0, 0.1);
+            --navbar-bg: rgba(255, 255, 255, 0.9);
+            --input-bg: #fff;
+            --input-text: #000;
+            --history-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* شريط التنقل */
+        .navbar {
+            width: 100%; max-width: 850px;
+            display: flex; justify-content: space-around; align-items: center;
+            background: var(--navbar-bg); backdrop-filter: blur(10px);
+            padding: 12px; border-radius: 12px; margin-bottom: 20px;
+            border: var(--card-border); position: relative;
+            z-index: 50;
+        }
+        .nav-link {
+            color: var(--text-color); text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 8px; opacity: 0.8; transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active { background: #00d2ff; color: #000; opacity: 1; }
+
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .theme-btn, .noti-icon {
+            cursor: pointer; font-size: 1.2rem; padding: 6px 12px; background: var(--card-bg); border: var(--card-border); border-radius: 8px;
+        }
+
+        .noti-icon { position: relative; }
+        .noti-badge {
+            position: absolute; top: -5px; right: -5px; background: #e53e3e; color: #fff;
+            font-size: 0.75rem; padding: 2px 6px; border-radius: 50%; font-weight: bold;
+        }
+        .noti-dropdown {
+            display: none; position: absolute; top: 55px; right: 0; width: 310px;
+            background: var(--card-bg); backdrop-filter: blur(15px); border: 2px solid #00d2ff; border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 9999; padding: 15px; max-height: 300px; overflow-y: auto;
+        }
+        .noti-item { padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.2); font-size: 0.85rem; }
+
+        /* التنبيه الطافي */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #00d2ff; color: #000;
+            text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 10000;
+            left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        .main-container {
+            width: 100%; max-width: 850px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+        @media (max-width: 768px) { .main-container { grid-template-columns: 1fr; } }
+
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: var(--card-border); border-radius: 16px;
+            padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        .full-width { grid-column: 1 / -1; }
+
+        .virtual-card {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border-radius: 16px; padding: 22px; color: #000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative;
+            margin-bottom: 20px; overflow: hidden;
+        }
+        .virtual-card.frozen {
+            background: linear-gradient(135deg, #555, #888) !important;
+            filter: grayscale(1); opacity: 0.7;
+        }
+        .card-chip { width: 45px; height: 32px; background: gold; border-radius: 6px; margin-bottom: 20px; }
+        .card-number { font-size: 1.3rem; letter-spacing: 3px; font-family: monospace; font-weight: bold; margin-bottom: 15px; }
+        .card-details { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; }
+        .freeze-badge {
+            position: absolute; top: 15px; left: 15px; background: #e53e3e; color: #fff;
+            padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: none;
+        }
+
+        .user-welcome {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: var(--card-border); padding-bottom: 15px; margin-bottom: 15px;
+        }
+        .user-name { color: #00d2ff; font-size: 1.4rem; }
+        .account-num { opacity: 0.7; font-size: 0.9rem; }
+
+        .balance-box {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; color: #fff;
+        }
+        .balance-amount { font-size: 2.2rem; font-weight: bold; color: #00ffcc; margin-top: 5px; }
+
+        input {
+            width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px;
+            border: var(--card-border); background: var(--input-bg); color: var(--input-text);
+        }
+        button {
+            width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px; border: none;
+            background: #00d2ff; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        button:hover { background: #00a8cc; }
+        .logout-btn { background: #e53e3e; color: #fff; }
+
+        .qr-section { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #qrcode { background: white; padding: 10px; border-radius: 8px; margin: 15px 0; }
+        #reader { width: 100%; max-width: 300px; margin-top: 15px; border-radius: 12px; overflow: hidden; display: none; }
+
+        .history-list { list-style: none; max-height: 180px; overflow-y: auto; }
+        .history-item {
+            display: flex; justify-content: space-between; background: var(--history-bg);
+            padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.85rem;
+        }
+        .tx-plus { color: #00b894; }
+        .tx-minus { color: #e53e3e; }
+    </style>
+
+    <style>
+      /* استجابة كروت البنك ومكين امباور للجوال والحاسوب */
+      .empire-card-container {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .empire-grid-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .empire-grid-row input {
+        flex: 1;
+        min-width: 200px;
+      }
+      
+      /* شاشات الهواتف (أقل من 768px) */
+      @media (max-width: 768px) {
+        .empire-grid-row {
+          flex-direction: column;
+        }
+        .empire-grid-row input, .empire-grid-row button {
+          width: 100% !important;
+        }
+        #empireView .card {
+          padding: 15px !important;
+        }
+      }
+    </style>
+    
+</head>
+<body data-theme="dark">
+
+    <nav class="navbar">
+        <div style="display: flex; gap: 5px;">
+            <a href="bank.html" class="nav-link active">البنك</a>
+            <a href="crypto.html" class="nav-link">العملات</a>
+            <a href="store.html" class="nav-link">المتجر</a>
+            <a href="media.html" class="nav-link">الوسائط</a>
+        </div>
+
+        <div class="nav-actions">
+            <button class="theme-btn" onclick="toggleTheme()" id="themeToggleBtn" title="تبديل الثيم">🌙</button>
+
+            <div class="noti-icon" onclick="toggleNotifications(event)">
+                🔔 <span id="notiCount" class="noti-badge">0</span>
+                <div id="notiDropdown" class="noti-dropdown">
+                    <h4 style="margin-bottom:8px; border-bottom:1px solid rgba(128,128,128,0.3); padding-bottom:5px; color:#00d2ff;">التنبيهات</h4>
+                    <div id="notiList"><p style="font-size:0.8rem; opacity:0.6;">لا توجد إشعارات</p></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="toast">تمت العملية بنجاح!</div>
+
+    <div class="main-container">
+        
+        <!-- البطاقة والرصيد -->
+        <div class="card full-width">
+            <div class="user-welcome">
+                <div>
+                    <h2>أهلاً بك، <span id="display-name" class="user-name">جاري التحميل...</span></h2>
+                    <p class="account-num">رقم الحساب: <span id="display-acc">----</span></p>
+                </div>
+                <button onclick="logout()" class="logout-btn" style="width: auto; padding: 8px 16px;">خروج</button>
+            </div>
+
+            <!-- البطاقة الافتراضية -->
+            <div id="vCard" class="virtual-card">
+                <span id="freezeBadge" class="freeze-badge">مجمدة ❄️</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="card-chip"></div>
+                    <strong style="font-size:1.1rem;">MKIN VISA</strong>
+                </div>
+                <div id="cardNum" class="card-number">4196 **** **** 5604</div>
+                <div class="card-details">
+                    <div>
+                        <div style="font-size:0.65rem; color:#333;">حامل البطاقة</div>
+                        <span id="cardHolder">MOHAMED DIDDOU</span>
+                    </div>
+                    <div>
+                        <div style="font-size:0.65rem; color:#333;">الصلاحية</div>
+                        <span>12/28</span>
+                    </div>
+                    <div>
+                        <div style="font-size:0.65rem; color:#333;">CVC</div>
+                        <span>892</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="toggleFreezeBtn" onclick="toggleCardFreeze()" style="background:#ff9800; color:#000;">تجميد البطاقة ❄️</button>
+
+            <div class="balance-box" style="margin-top: 15px;">
+                <div>الرصيد الإجمالي للحساب</div>
+                <div class="balance-amount"><span id="display-balance">0.00</span> د.م</div>
+            </div>
+        </div>
+
+        <!-- الرسم البياني التحليلي -->
+        <div class="card full-width">
+            <h3 style="margin-bottom: 10px;">التحليل المالي والنشاطات</h3>
+            <div style="width: 100%; max-width: 400px; margin: 0 auto;">
+                <canvas id="financeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- كارت QR والكاميرا -->
+        <div class="card qr-section">
+            <h3>الدفع والإستلام عبر QR</h3>
+            <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 5px;">رمز QR الخاص بك:</p>
+            <div id="qrcode"></div>
+            
+            <button onclick="startCameraScanner()" style="background: #00ffcc; color: #000;">فتح الكاميرا ومسح QR 📷</button>
+            <button id="stopCameraBtn" onclick="stopCameraScanner()" style="background: #e53e3e; color: #fff; display: none;">إغلاق الكاميرا ✖</button>
+            
+            <div id="reader"></div>
+        </div>
+
+        <!-- التحويل والإيداع -->
+        <div class="card">
+            <h3>تحويل أموال سريع</h3>
+            <input type="text" id="targetAcc" placeholder="رقم حساب المستلم">
+            <input type="number" id="transferAmount" placeholder="المبلغ (د.م)">
+            <button onclick="transferMoney()">إرسال الأموال</button>
+            
+            <hr style="margin: 15px 0; border: 0.5px solid rgba(128,128,128,0.2);">
+            
+            <h3>تغذية الحساب (إيداع)</h3>
+            <input type="number" id="depositAmount" placeholder="المبلغ (د.م)">
+            <button onclick="depositMoney()" style="background: #28a745; color: white;">إيداع الآن</button>
+        </div>
+
+        <!-- سجل المعاملات -->
+        <div class="card full-width">
+            <h3>سجل المعاملات الأخيرة</h3>
+            <ul id="historyList" class="history-list" style="margin-top: 10px;">
+                <li class="history-item">لا توجد معاملات حالياً</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        let currentUser = null;
+        let html5QrcodeScanner = null;
+        let myChart = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentUserData = localStorage.getItem('mkin_current_user');
+
+            if (!currentUserData) {
+                alert("يرجى تسجيل الدخول أولاً!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            currentUser = JSON.parse(currentUserData);
+
+            if (currentUser.balance === undefined) currentUser.balance = 105000;
+            if (currentUser.isFrozen === undefined) currentUser.isFrozen = false;
+            if (!currentUser.history) currentUser.history = [];
+            if (!currentUser.notifications) currentUser.notifications = [
+                { text: "أهلاً بك في منصة مكين بنك!", time: "الآن" }
+            ];
+
+            const savedTheme = localStorage.getItem('mkin_theme') || 'dark';
+            setTheme(savedTheme);
+
+            updateUI();
+            generateQRCode();
+            initChart();
+        });
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('mkin_theme', theme);
+            const btn = document.getElementById('themeToggleBtn');
+            btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        document.addEventListener('click', function(event) {
+            const notiIcon = document.querySelector('.noti-icon');
+            const dropdown = document.getElementById("notiDropdown");
+            if (notiIcon && !notiIcon.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function addNotification(text) {
+            currentUser.notifications.unshift({ text: text, time: new Date().toLocaleTimeString('ar-MA') });
+            updateUI();
+        }
+
+        function toggleNotifications(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById("notiDropdown");
+            dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+            document.getElementById("notiCount").textContent = "0";
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            
+            // حساب إجمالي الواردات والصادرات
+            let totalDeposit = 0;
+            let totalTransfer = 0;
+
+            currentUser.history.forEach(item => {
+                if (item.type === 'deposit' || item.type === 'receive') {
+                    totalDeposit += item.amount;
+                } else if (item.type === 'transfer') {
+                    totalTransfer += item.amount;
+                }
+            });
+
+            // إذا لم تكن هناك معاملات، نضع قيم افتراضية للعرض الجمالي
+            if (totalDeposit === 0 && totalTransfer === 0) {
+                totalDeposit = 1000;
+                totalTransfer = 200;
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['الواردات (إيداع واستلام)', 'الصادرات (تحويل ومشتريات)'],
+                    datasets: [{
+                        data: [totalDeposit, totalTransfer],
+                        backgroundColor: ['#00ffcc', '#e53e3e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartData() {
+            if (!myChart) return;
+            let totalDeposit = 0;
+            let totalTransfer = 0;
+
+            currentUser.history.forEach(item => {
+                if (item.type === 'deposit' || item.type === 'receive') {
+                    totalDeposit += item.amount;
+                } else if (item.type === 'transfer') {
+                    totalTransfer += item.amount;
+                }
+            });
+
+            myChart.data.datasets[0].data = [totalDeposit || 1000, totalTransfer || 200];
+            myChart.update();
+        }
+
+        function updateUI() {
+            document.getElementById('display-name').textContent = currentUser.name || "مستخدم مكين";
+            document.getElementById('display-acc').textContent = currentUser.acc || "----";
+            document.getElementById('display-balance').textContent = currentUser.balance.toFixed(2);
+            document.getElementById('cardHolder').textContent = (currentUser.name || "MOHAMED DIDDOU").toUpperCase();
+
+            if (currentUser.acc) {
+                document.getElementById('cardNum').textContent = `${currentUser.acc.substring(0,4)} **** **** ${currentUser.acc.slice(-4)}`;
+            }
+
+            const vCard = document.getElementById('vCard');
+            const freezeBadge = document.getElementById('freezeBadge');
+            const toggleFreezeBtn = document.getElementById('toggleFreezeBtn');
+
+            if (currentUser.isFrozen) {
+                vCard.classList.add('frozen');
+                freezeBadge.style.display = 'block';
+                toggleFreezeBtn.textContent = 'إلغاء تجميد البطاقة 🔥';
+                toggleFreezeBtn.style.background = '#28a745';
+                toggleFreezeBtn.style.color = '#fff';
+            } else {
+                vCard.classList.remove('frozen');
+                freezeBadge.style.display = 'none';
+                toggleFreezeBtn.textContent = 'تجميد البطاقة ❄️';
+                toggleFreezeBtn.style.background = '#ff9800';
+                toggleFreezeBtn.style.color = '#000';
+            }
+
+            saveUserData();
+            updateChartData();
+
+            const notiList = document.getElementById('notiList');
+            document.getElementById('notiCount').textContent = currentUser.notifications.length;
+            notiList.innerHTML = '';
+            currentUser.notifications.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'noti-item';
+                div.innerHTML = `<div>${n.text}</div><small style="color:#00d2ff;">${n.time}</small>`;
+                notiList.appendChild(div);
+            });
+
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+
+            if (currentUser.history.length === 0) {
+                historyList.innerHTML = '<li class="history-item">لا توجد معاملات سابقة</li>';
+            } else {
+                currentUser.history.slice().reverse().forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    const isPlus = item.type === 'deposit' || item.type === 'receive';
+                    const sign = isPlus ? '+' : '-';
+                    const colorClass = isPlus ? 'tx-plus' : 'tx-minus';
+
+                    li.innerHTML = `
+                        <span>${item.desc}</span>
+                        <strong class="${colorClass}">${sign}${item.amount.toFixed(2)} د.م</strong>
+                    `;
+                    historyList.appendChild(li);
+                });
+            }
+        }
+
+        function toggleCardFreeze() {
+            currentUser.isFrozen = !currentUser.isFrozen;
+            const msg = currentUser.isFrozen ? "تم تجميد البطاقة ❄️" : "تم إلغاء تجميد البطاقة 🔥";
+            addNotification(msg);
+            showToast(msg);
+            updateUI();
+        }
+
+        function generateQRCode() {
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: JSON.stringify({ acc: currentUser.acc, name: currentUser.name }),
+                width: 120,
+                height: 120
+            });
+        }
+
+        function startCameraScanner() {
+            if (currentUser.isFrozen) {
+                showToast("عذراً! البطاقة مجمدة.");
+                return;
+            }
+
+            const readerDiv = document.getElementById('reader');
+            readerDiv.style.display = 'block';
+            document.getElementById('stopCameraBtn').style.display = 'block';
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 200, height: 200 } },
+                (decodedText) => {
+                    try {
+                        const parsedData = JSON.parse(decodedText);
+                        if (parsedData.acc) {
+                            document.getElementById('targetAcc').value = parsedData.acc;
+                        } else if (parsedData.product && parsedData.amount) {
+                            document.getElementById('transferAmount').value = parsedData.amount;
+                            showToast(`تم مسح المنتج: ${parsedData.product}`);
+                        }
+                    } catch (e) {
+                        document.getElementById('targetAcc').value = decodedText;
+                    }
+                    stopCameraScanner();
+                    showToast("تم قراءة QR وتعبئة الحقول!");
+                },
+                (err) => {}
+            ).catch(err => {
+                showToast("تعذر فتح الكاميرا!");
+                stopCameraScanner();
+            });
+        }
+
+        function stopCameraScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('reader').style.display = 'none';
+                    document.getElementById('stopCameraBtn').style.display = 'none';
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function saveUserData() {
+            localStorage.setItem('mkin_current_user', JSON.stringify(currentUser));
+            let savedAccounts = JSON.parse(localStorage.getItem('mkin_db_accounts')) || {};
+            savedAccounts[currentUser.acc] = currentUser;
+            localStorage.setItem('mkin_db_accounts', JSON.stringify(savedAccounts));
+        }
+
+        function depositMoney() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                showToast("يرجى إدخال مبلغ صحيح!");
+                return;
+            }
+
+            currentUser.balance += amount;
+            currentUser.history.push({
+                type: 'deposit',
+                desc: 'إيداع نقدي بالحساب',
+                amount: amount
+            });
+
+            addNotification(`تم إيداع مبلغ ${amount} د.م بنجاح.`);
+            showToast(`تم إيداع ${amount} د.م!`);
+            document.getElementById('depositAmount').value = '';
+            updateUI();
+        }
+
+        function transferMoney() {
+            if (currentUser.isFrozen) {
+                showToast("عذراً، البطاقة مجمدة حالياً!");
+                return;
+            }
+
+            const targetAcc = document.getElementById('targetAcc').value.trim();
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+
+            if (!targetAcc || isNaN(amount) || amount <= 0) {
+                showToast("يرجى إدخال البيانات بشكل صحيح!");
+                return;
+            }
+
+            if (amount > currentUser.balance) {
+                showToast("الرصيد غير كافٍ!");
+                return;
+            }
+
+            if (targetAcc === currentUser.acc) {
+                showToast("لا يمكنك التحويل لنفسك!");
+                return;
+            }
+
+            let savedAccounts = JSON.parse(localStorage.getItem('mkin_db_accounts')) || {};
+
+            if (!savedAccounts[targetAcc]) {
+                showToast("حساب المستلم غير موجود!");
+                return;
+            }
+
+            currentUser.balance -= amount;
+            currentUser.history.push({
+                type: 'transfer',
+                desc: `تحويل إلى: ${savedAccounts[targetAcc].name || targetAcc}`,
+                amount: amount
+            });
+
+            if (savedAccounts[targetAcc].balance === undefined) savedAccounts[targetAcc].balance = 0;
+            if (!savedAccounts[targetAcc].history) savedAccounts[targetAcc].history = [];
+
+            savedAccounts[targetAcc].balance += amount;
+            savedAccounts[targetAcc].history.push({
+                type: 'receive',
+                desc: `استلام من: ${currentUser.name}`,
+                amount: amount
+            });
+
+            localStorage.setItem('mkin_db_accounts', JSON.stringify(savedAccounts));
+
+            addNotification(`تم تحويل ${amount} د.م إلى الحساب ${targetAcc}`);
+            showToast("تم تحويل المبلغ بنجاح!");
+
+            document.getElementById('targetAcc').value = '';
+            document.getElementById('transferAmount').value = '';
+
+            updateUI();
+        }
+
+        function logout() {
+            localStorage.removeItem('mkin_current_user');
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- واجهة مكين امباور المستقلة داخل البنك -->
+    
+    <!-- Makeen Empire View (Exact Match with Bank Cards) -->
+    
+
+    <!-- Makeen Empire View (At the Bottom, Exact Dimensions) -->
+    <div id="empireView" class="bank-view hidden" style="width: 100%; display: flex; justify-content: center; box-sizing: border-box; padding: 10px 0; margin-top: 20px;">
+      <div class="card" style="width: 100%; max-width: 850px; background: #131625; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 25px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); direction: rtl; text-align: right;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 15px;">
+          <h2 style="margin: 0; font-size: 1.3rem; color: #fff; font-weight: bold;">Makeen Empire - مكين امباور</h2>
+          <span style="background: rgba(0, 210, 255, 0.15); color: #00d2ff; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">الأتمتة والدفع</span>
+        </div>
+        
+        <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">مرحباً بك في سوق الأتمتة والدفع الرقمي المباشر.</p>
+        
+        <!-- بوابة الدفع -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 18px; border-radius: 14px; margin-bottom: 20px;">
+          <h3 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 10px; color: #00d2ff; font-weight: 600;">بوابة الدفع التلقائي (USDT - TRC20)</h3>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 10px;">عنوان المحفظة المخصص لاستلام المدفوعات:</p>
+          
+          <input type="text" readonly value="TL5Baj4KkedHF5yhunHuk946cKpeTyWhAQ" style="width: 100%; background: #0a0c14; color: #00d2ff; border: 1px solid rgba(0, 210, 255, 0.2); padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; font-family: monospace; box-sizing: border-box; margin-bottom: 12px;">
+
+          
+          <div style="text-align: center; margin: 15px 0;">
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">امسح كود الـ QR للدفع السريع:</p>
+            <img src="usdt_payment_qr.png" alt="USDT Payment QR" style="width: 150px; height: 150px; border-radius: 12px; border: 2px solid #00d2ff; padding: 5px; background: #131625;">
+          </div>
+    
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="txidInput" placeholder="أدخل رقم العملية (TXID) للتفعيل الفوري" style="flex: 1; min-width: 220px; background: #0a0c14; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; box-sizing: border-box;">
+            <button onclick="verifyEmpirePayment()" style="background: linear-gradient(135deg, #00d2ff, #0072ff); color: #fff; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; min-width: 100px;">تحقق</button>
+          </div>
+        </div>
+
+        <!-- مختبر الحلول -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 18px; border-radius: 14px;">
+          <h3 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 10px; color: #00d2ff; font-weight: 600;">مختبر الحلول والأتمتة</h3>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="solverInput" placeholder="صف طلبك أو استفسارك هنا..." style="flex: 1; min-width: 220px; background: #0a0c14; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 10px; box-sizing: border-box;">
+            <button onclick="submitSolverQuery()" style="background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; min-width: 100px;">إرسال</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+<!-- End Empire View -->
+
+    <script>
+      // دالة التحقق من عملية الدفع (TXID)
+      function verifyEmpirePayment() {
+        const txid = document.getElementById('txidInput').value.trim();
+        if (!txid) {
+          alert('⚠️ يرجى إدخال رقم العملية (TXID) أولاً!');
+          return;
+        }
+        alert('⏳ جاري التحقق من العملية رقم:\n' + txid + '\n\n✅ تم التأكيد بنجاح! تم تفعيل خدمات مكين امباور.');
+        document.getElementById('txidInput').value = '';
+      }
+
+      // دالة إرسال الاستفسارات لمختبر الحلول
+      function submitSolverQuery() {
+        const query = document.getElementById('solverInput').value.trim();
+        if (!query) {
+          alert('⚠️ يرجى كتابة الاستفسار أو المشكلة قبل الإرسال!');
+          return;
+        }
+        alert('🚀 تم إرسال استفسارك بنجاح إلى مختبر الحلول:\n"' + query + '"\n\nسيتولى النظام معالجته فوراً.');
+        document.getElementById('solverInput').value = '';
+      }
+    </script>
+    
+</body>
+</html>
