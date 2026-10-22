@@ -36,6 +36,12 @@ android.archs = arm64-v8a
 # Automatically accept Android SDK licenses
 android.accept_sdk_license = True
 
+# (int) Target Android API, should be as high as possible.
+android.api = 31
+
+# (int) Minimum API your APK will support.
+android.minapi = 21
+
 [buildozer]
 
 # (int) Log level (0 = error, 1 = info, 2 = debug (with command output))
