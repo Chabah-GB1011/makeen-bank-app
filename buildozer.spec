@@ -12,16 +12,16 @@ package.domain = org.makeen
 # (str) Source files where the let's include everything
 source.dir = .
 
-# (list) Source files to include (let's add html, css, js and png for the QR code)
+# (list) Source files to include
 source.include_exts = py,png,jpg,kv,atlas,html,css,js
 
 # (str) Application version
 version = 0.1
 
-# (list) Application requirements
-requirements = python3,kivy,pillow,qrcode
+# (list) Application requirements (تم تبسيطها لتجنب أخطاء التجميع الثقيلة)
+requirements = python3,kivy
 
-# (str) Supported orientation (landscape or portrait or all)
+# (str) Supported orientation
 orientation = portrait
 
 # (bool) Indicate if the application should be fullscreen or not
@@ -37,13 +37,10 @@ android.archs = arm64-v8a
 android.accept_sdk_license = True
 
 # (int) Target Android API
-android.api = 31
+android.api = 33
 
 # (int) Minimum API your APK will support
 android.minapi = 21
-
-# (str) Android NDK version to use
-android.ndk = 25b
 
 [buildozer]
 
