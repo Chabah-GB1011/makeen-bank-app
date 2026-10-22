@@ -31,7 +31,7 @@ fullscreen = 0
 android.permissions = INTERNET
 
 # (str) Supported architectures
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # Automatically accept Android SDK licenses
 android.accept_sdk_license = True
@@ -41,9 +41,6 @@ android.api = 33
 
 # (int) Minimum API your APK will support
 android.minapi = 21
-
-# (str) Android NDK version to use
-android.ndk = 25b
 
 [buildozer]
 
