@@ -15,6 +15,9 @@ source.dir = .
 # (list) Source files to include (let's add html, css, js and png for the QR code)
 source.include_exts = py,png,jpg,kv,atlas,html,css,js
 
+# (str) Application version
+version = 0.1
+
 # (list) Application requirements
 # Add python3, kivy, and our tools
 requirements = python3,kivy,pillow,qrcode
