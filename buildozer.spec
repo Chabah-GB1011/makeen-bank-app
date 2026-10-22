@@ -19,7 +19,6 @@ source.include_exts = py,png,jpg,kv,atlas,html,css,js
 version = 0.1
 
 # (list) Application requirements
-# Add python3, kivy, and our tools
 requirements = python3,kivy,pillow,qrcode
 
 # (str) Supported orientation (landscape or portrait or all)
@@ -29,11 +28,13 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-# (e.g. INTERNET to load local files or network if needed)
 android.permissions = INTERNET
 
 # (str) Supported architectures
 android.archs = arm64-v8a
+
+# Automatically accept Android SDK licenses
+android.accept_sdk_license = True
 
 [buildozer]
 
