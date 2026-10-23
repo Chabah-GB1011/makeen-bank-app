@@ -49,8 +49,10 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          yes | buildozer android debug
-          # البحث عن مكان ملف الـ APK ونسخه إلى مجلد bin لضمان رفعه
+          # فلترة جميع رسائل DEBUG والتحذيرات الزائدة لمنع تضخم واقتطاع السجلات
+          yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
+          
+          # تجميع ملفات الـ APK الناتجة ونقلها لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
