@@ -49,11 +49,8 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # إعطاء الموافقة التلقائية الصارمة لجميع شروط SDK/NDK
-          buildozer -v android debug <<EOF
-          y
-          y
-          EOF
+          # تشغيل أمر البناء بالوضع العادي الصامت لتفادي تضخم السجلات
+          yes | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
