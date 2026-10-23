@@ -49,7 +49,8 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          yes | buildozer -q android debug
+          # تنفيذ البناء بالكامل في الخلفية ومنع طبع السجلات على الشاشة لتجنب التوقف
+          stdbuf -oL -eL yes | buildozer android debug > build_output.log 2>&1 || (cat build_output.log && exit 1)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
