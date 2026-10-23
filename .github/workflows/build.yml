@@ -49,9 +49,8 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # تنفيذ البناء وتوجيه المخرجات لضمان اكتمال التغليف ووجود ملف الـ APK
-          yes | buildozer android debug
-          ls -la bin/
+          # تشغيل البناء بالوضع الهادئ الصامت بدون طباعة سجلات التصحيح الضخمة
+          yes | buildozer -q android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
