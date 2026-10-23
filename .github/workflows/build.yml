@@ -49,7 +49,8 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # إزالة علامة التفصيل -v لكي يعمل بهدوء وينتج الـ APK بدون تضخم السجلات
+          # تنظيف أي كاش قديم ثم البناء مباشرة بدون تفاصيل مفرطة تسبب الاقتطاع
+          yes | buildozer android clean
           yes | buildozer android debug
 
       - name: Upload APK
