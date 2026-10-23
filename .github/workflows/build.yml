@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-  
     runs-on: ubuntu-22.04
 
     steps:
@@ -33,17 +32,23 @@ jobs:
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
 
-      - name: Prepare NDK 25b
+      - name: Prepare NDK 25b and Configure Spec
         run: |
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
           wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
+          
+          # العودة لمجلد المشروع وتعديل buildozer.spec قسراً لمنع استخدام r28c
+          cd /home/runner/work/makeen-bank-app/makeen-bank-app
+          sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
+          sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
+          sed -i 's/^#* *android.minapi =.*/android.minapi = 21/' buildozer.spec
+          echo "android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b" >> buildozer.spec
 
       - name: Build Android APK
         run: |
-          echo "android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b" >> buildozer.spec
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           echo "y" | buildozer -v android debug
 
