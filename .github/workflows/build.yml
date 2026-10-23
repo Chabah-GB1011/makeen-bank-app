@@ -7,7 +7,9 @@ on:
 
 jobs:
   build:
+  
     runs-on: ubuntu-22.04
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,20 +25,30 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential ccache git libffi-dev libssl-dev python3-dev zip unzip openjdk-17-jdk zlib1g-dev
+          sudo apt-get install -y build-essential git libffi-dev libssl-dev python3-dev pip unzip openjdk-17-jdk liblqr-1-0-dev
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
-          pip install buildozer
+          pip install --upgrade buildozer
 
-      - name: Build APK
+      - name: Prepare NDK 25b
         run: |
-          buildozer android debug
+          mkdir -p ~/.buildozer/android/platform/
+          cd ~/.buildozer/android/platform/
+          wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip
+          rm android-ndk-r25b-linux.zip
+
+      - name: Build Android APK
+        run: |
+          echo "android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r25b" >> buildozer.spec
+          export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
+          echo "y" | buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: MakeenBank-APK
+          name: makeen-bank-apk
           path: bin/*.apk
