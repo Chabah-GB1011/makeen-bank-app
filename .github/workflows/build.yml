@@ -49,7 +49,6 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # تشغيل البناء بالوضع الهادئ الصامت بدون طباعة سجلات التصحيح الضخمة
           yes | buildozer -q android debug
 
       - name: Upload APK
