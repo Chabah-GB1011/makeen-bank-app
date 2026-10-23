@@ -41,7 +41,7 @@ jobs:
           rm android-ndk-r25b-linux.zip
           ln -sf android-ndk-r25b android-ndk-r28c
           
-          cd /home/runner/work/makeen-bank-app/makeen-bank-app
+          cd $GITHUB_WORKSPACE
           sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
           sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
           sed -i 's/^#* *android.minapi =.*/android.minapi = 21/' buildozer.spec
@@ -49,7 +49,11 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          yes | buildozer android debug
+          # إعطاء الموافقة التلقائية الصارمة لجميع شروط SDK/NDK
+          buildozer -v android debug <<EOF
+          y
+          y
+          EOF
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
