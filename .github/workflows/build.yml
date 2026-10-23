@@ -49,8 +49,10 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # إخفاء مخرجات CPython والتحذيرات الزائدة لمنع اقتطاع السجلات
-          yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
+          yes | buildozer android debug
+          # البحث عن مكان ملف الـ APK ونسخه إلى مجلد bin لضمان رفعه
+          mkdir -p bin
+          find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
 
       - name: Upload APK
