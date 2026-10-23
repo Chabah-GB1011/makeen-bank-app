@@ -49,16 +49,17 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # فلترة جميع رسائل DEBUG والتحذيرات الزائدة لمنع تضخم واقتطاع السجلات
+          # تنفيذ البناء وتصفية سجلات التصحيح الزائدة
           yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
           
-          # تجميع ملفات الـ APK الناتجة ونقلها لمجلد bin
+          # إيجاد مكان الـ APK ونقله لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
+          echo "Content of bin directory:"
           ls -la bin/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: makeen-bank-apk
-          path: bin/*.apk
+          path: "**/*.apk"
