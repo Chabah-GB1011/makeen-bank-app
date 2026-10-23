@@ -32,30 +32,25 @@ jobs:
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
 
-      - name: Enforce NDK 25b via Symlink Trick
+      - name: Prepare NDK 25b & Setup
         run: |
-          # إنشاء المجلد الرئيسي للتطبيقات
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
-          
-          # تحميل NDK 25b
           wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
-          
-          # خدعة الرابط الرمزي: توجيه أي طلب لـ r28c إلى r25b الحقيقي
           ln -sf android-ndk-r25b android-ndk-r28c
           
-          # تعديل buildozer.spec في مجلد المشروع
           cd /home/runner/work/makeen-bank-app/makeen-bank-app
           sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
           sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
           sed -i 's/^#* *android.minapi =.*/android.minapi = 21/' buildozer.spec
 
-      - name: Build Android APK
+      - name: Clean & Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          echo "y" | buildozer -v android debug
+          # بناء خفيف وسريع بدون طباعة ملايين السطور لمنع تجميد المتصفح
+          echo "y" | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
