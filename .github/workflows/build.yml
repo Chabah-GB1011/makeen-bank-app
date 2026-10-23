@@ -49,8 +49,7 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # تنظيف أي كاش قديم ثم البناء مباشرة بدون تفاصيل مفرطة تسبب الاقتطاع
-          yes | buildozer android clean
+          # بناء مباشر بدون حذف لتفادي فقدان ملفات البناء الداخلية
           yes | buildozer android debug
 
       - name: Upload APK
