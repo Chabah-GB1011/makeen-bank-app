@@ -46,11 +46,10 @@ jobs:
           sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
           sed -i 's/^#* *android.minapi =.*/android.minapi = 21/' buildozer.spec
 
-      - name: Clean & Build Android APK
+      - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # بناء خفيف وسريع بدون طباعة ملايين السطور لمنع تجميد المتصفح
-          echo "y" | buildozer android debug
+          yes | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
