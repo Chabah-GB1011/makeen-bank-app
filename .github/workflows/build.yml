@@ -49,7 +49,7 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # تشغيل أمر البناء بالوضع العادي الصامت لتفادي تضخم السجلات
+          # إزالة علامة التفصيل -v لكي يعمل بهدوء وينتج الـ APK بدون تضخم السجلات
           yes | buildozer android debug
 
       - name: Upload APK
