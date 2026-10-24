@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 40
 
     steps:
       - name: Checkout Code
@@ -24,19 +25,18 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
 
-      - name: Install Dependencies & Compatible P4A
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential git libffi-dev libssl-dev python3-dev pip unzip openjdk-17-jdk liblqr-1-0-dev
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
-          pip install --upgrade "python-for-android>=2024.1.0"
+          pip install --upgrade "python-for-android==2024.1.0"
 
-      - name: Prepare NDK 25 & Environment
+      - name: Setup Android NDK 25
         run: |
           rm -rf .buildozer
-          
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
           rm -rf android-ndk-r25b*
@@ -49,15 +49,20 @@ jobs:
           ln -sf android-ndk-r25 android-ndk-r20c
           ln -sf android-ndk-r25 android-ndk
 
-      - name: Build Android APK
+      - name: Build Android APK with Buildozer
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          # استخدام buildozer بدون مفتاح debug الطويل لمنع طفح السجلات واجتياز خط النهاية بنجاح
-          buildozer android release || buildozer android debug
+          buildozer android debug
 
-      - name: Upload APK
+      - name: Verify and Find APK
+        run: |
+          mkdir -p bin
+          find . -name "*.apk" -exec cp {} bin/ \;
+          ls -la bin/
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: makeen-bank-apk
