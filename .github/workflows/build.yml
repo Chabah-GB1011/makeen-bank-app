@@ -49,14 +49,19 @@ jobs:
           ln -sf android-ndk-r25 android-ndk-r20c
           ln -sf android-ndk-r25 android-ndk
 
-      - name: Build Android APK Silently
+      - name: Build Android APK Quietly
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          # إيقاف الديباج تماماً والبناء بصمت تام لتجنب امتلاء السجلات وقتل العملية
-          # سيتم استخدام buildozer android release لتوليد التطبيق النهائي
-          buildozer android release || buildozer android debug
+          # تشغيل البناء بصمت تام ومنع أي تدفق زائد للسجلات يسبب القطع
+          buildozer android debug || {
+            echo "=== BUILD FAILED, SHOWING LAST LINES OF LOG ==="
+            if [ -f .buildozer/android/platform/build-arm64-v8a/dists/makeenbank/build.log ]; then
+              tail -n 50 .buildozer/android/platform/build-arm64-v8a/dists/makeenbank/build.log
+            fi
+            exit 1
+          }
 
       - name: Verify and Find APK
         run: |
