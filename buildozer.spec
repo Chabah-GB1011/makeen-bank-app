@@ -21,5 +21,6 @@ android.gradle_version = 7.4.2
 android.enable_androidx = True
 
 [buildozer]
-log_level = 2
+# 0 = error, 1 = info, 2 = debug
+log_level = 0
 warn_on_root = 1
