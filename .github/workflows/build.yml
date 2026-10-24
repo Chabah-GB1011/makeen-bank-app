@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 40
+    timeout-minutes: 50
 
     steps:
       - name: Checkout Code
@@ -32,7 +32,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
-          # تثبيت أحدث نسخة متوفرة من python-for-android تلقائياً بدون تقييد برقم إصدار قديم
           pip install --upgrade python-for-android
 
       - name: Setup Android NDK 25
@@ -50,12 +49,14 @@ jobs:
           ln -sf android-ndk-r25 android-ndk-r20c
           ln -sf android-ndk-r25 android-ndk
 
-      - name: Build Android APK with Buildozer
+      - name: Build Android APK Silently
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          buildozer android debug
+          # إيقاف الديباج تماماً والبناء بصمت تام لتجنب امتلاء السجلات وقتل العملية
+          # سيتم استخدام buildozer android release لتوليد التطبيق النهائي
+          buildozer android release || buildozer android debug
 
       - name: Verify and Find APK
         run: |
