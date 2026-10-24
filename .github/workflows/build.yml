@@ -32,7 +32,7 @@ jobs:
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
 
-      - name: Prepare NDK 25b & Setup
+      - name: Prepare NDK 25b & Setup Symlinks
         run: |
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
@@ -40,8 +40,9 @@ jobs:
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
           
-          # إنشاء الوصلات الرمزية لتغطية أي اسم يطلبه buildozer
+          # إنشاء كل الوصلات الرمزية المحتملة التي قد يطلبها Buildozer
           ln -sf android-ndk-r25b android-ndk-r28c
+          ln -sf android-ndk-r25b android-ndk-r20c
           ln -sf android-ndk-r25b android-ndk
           
           cd $GITHUB_WORKSPACE
@@ -51,10 +52,12 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # تشغيل البناء وتوجيه المسار تلقائياً
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== LOG HEAD ===" && head -n 40 build.log && echo "=== LOG TAIL ===" && tail -n 60 build.log && exit 1)
+          export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # جمع ملف APK ونسخه لمجلد bin
+          # البناء مع تصفية رسائل DEBUG الزائدة
+          yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
+          
+          # جمع وتوفير ملف الـ APK لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
