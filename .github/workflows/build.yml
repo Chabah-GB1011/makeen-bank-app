@@ -32,7 +32,7 @@ jobs:
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
 
-      - name: Prepare NDK 25b & Setup Symlinks
+      - name: Prepare NDK 25b & Setup Environment
         run: |
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
@@ -40,10 +40,12 @@ jobs:
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
           
+          # تثبيت الوصلات الرمزية الشاملة لجميع الاحتمالات
           ln -sf android-ndk-r25b android-ndk-r28c
           ln -sf android-ndk-r25b android-ndk-r20c
           ln -sf android-ndk-r25b android-ndk
           
+          # ضبط ملف buildozer.spec مباشرة
           cd $GITHUB_WORKSPACE
           sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
           sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
@@ -52,11 +54,11 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
+          export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # توجيه البناء لملف خارجي، وفي حالة الخطأ يتم طباعة آخر 100 سطر فقط لمعرفة السبب المباشر
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== ERROR SUMMARY (LAST 100 LINES) ===" && tail -n 100 build.log && exit 1)
+          # تشغيل البناء مع حفظ اللوج وطباعة آخر 100 سطر عند أي خطأ
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD FAILED ===" && tail -n 100 build.log && exit 1)
           
-          # نسخ الملف الناتج
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
