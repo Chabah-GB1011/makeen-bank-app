@@ -54,17 +54,8 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          # تشغيل البناء مع تفعيل وضع الديباج وطباعة السجل كاملاً عند أي خطأ لتظهر المشكلة الحقيقية فوراً
-          buildozer -v android debug || {
-            echo "========================================="
-            echo "=== BUILD FAILED - FULL LOG DUMP START ==="
-            echo "========================================="
-            if [ -f build.log ]; then tail -n 120 build.log; fi
-            echo "========================================="
-            echo "=== BUILD FAILED - LOG DUMP END ===="
-            echo "========================================="
-            exit 1
-          }
+          # إزالة وضع الـ verbose الطويل المزعج، والاعتماد على بناء هادئ وواضح
+          buildozer android debug || exit 1
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
