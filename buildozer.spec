@@ -39,7 +39,7 @@ android.accept_sdk_license = True
 # Target Android API & NDK Configuration
 android.api = 31
 android.minapi = 21
-android.ndk = 25b
+android.ndk = 25
 android.gradle_version = 7.4.2
 
 # Enable AndroidX
