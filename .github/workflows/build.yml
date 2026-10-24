@@ -39,7 +39,10 @@ jobs:
           wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
+          
+          # إنشاء الوصلات الرمزية لتغطية أي اسم يطلبه buildozer
           ln -sf android-ndk-r25b android-ndk-r28c
+          ln -sf android-ndk-r25b android-ndk
           
           cd $GITHUB_WORKSPACE
           sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
@@ -48,13 +51,13 @@ jobs:
 
       - name: Build Android APK
         run: |
-          export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # حفظ السجلات في ملف وإظهار ملخص الخطأ إن وجد
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD FAILED: LAST 80 LOG LINES ===" && tail -n 80 build.log && exit 1)
+          # تشغيل البناء وتوجيه المسار تلقائياً
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== LOG HEAD ===" && head -n 40 build.log && echo "=== LOG TAIL ===" && tail -n 60 build.log && exit 1)
           
-          # نسخ الملف الناتج لمجلد bin
+          # جمع ملف APK ونسخه لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
+          ls -la bin/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
