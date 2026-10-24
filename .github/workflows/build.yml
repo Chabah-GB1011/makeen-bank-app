@@ -40,7 +40,6 @@ jobs:
           unzip -q android-ndk-r25b-linux.zip
           rm android-ndk-r25b-linux.zip
           
-          # إنشاء كل الوصلات الرمزية المحتملة التي قد يطلبها Buildozer
           ln -sf android-ndk-r25b android-ndk-r28c
           ln -sf android-ndk-r25b android-ndk-r20c
           ln -sf android-ndk-r25b android-ndk
@@ -54,10 +53,9 @@ jobs:
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # البناء مع تصفية رسائل DEBUG الزائدة
-          yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
+          # تشغيل البناء بشكل مباشر ورؤية الخطأ إن وجد دون كتمه
+          buildozer -v android debug
           
-          # جمع وتوفير ملف الـ APK لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
