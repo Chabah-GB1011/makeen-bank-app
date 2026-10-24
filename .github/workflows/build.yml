@@ -53,10 +53,10 @@ jobs:
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # تشغيل البناء وتوجيه السجلات لملف صامت لمنع تضخم واقتطاع الشاشة
-          yes | buildozer android debug > build_out.log 2>&1 || (cat build_out.log && exit 1)
+          # توجيه البناء لملف خارجي، وفي حالة الخطأ يتم طباعة آخر 100 سطر فقط لمعرفة السبب المباشر
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== ERROR SUMMARY (LAST 100 LINES) ===" && tail -n 100 build.log && exit 1)
           
-          # البحث عن ملف الـ APK أينما كان ونسخه إلى مجلد bin
+          # نسخ الملف الناتج
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
           ls -la bin/
