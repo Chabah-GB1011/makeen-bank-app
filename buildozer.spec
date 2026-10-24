@@ -39,6 +39,7 @@ android.accept_sdk_license = True
 # (int) Target Android API
 android.api = 31
 android.ndk = 25b
+android.gradle_version = 7.4.2
 
 # (int) Minimum API your APK will support
 android.minapi = 21
