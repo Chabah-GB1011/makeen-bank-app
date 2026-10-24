@@ -49,17 +49,15 @@ jobs:
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
-          # تنفيذ البناء وتصفية سجلات التصحيح الزائدة
-          yes | buildozer android debug 2>&1 | grep -v -E "(DEBUG|warning:|Exception check)" || true
+          # حفظ السجلات في ملف وإظهار ملخص الخطأ إن وجد
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD FAILED: LAST 80 LOG LINES ===" && tail -n 80 build.log && exit 1)
           
-          # إيجاد مكان الـ APK ونقله لمجلد bin
+          # نسخ الملف الناتج لمجلد bin
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
-          echo "Content of bin directory:"
-          ls -la bin/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: makeen-bank-apk
-          path: "**/*.apk"
+          path: bin/*.apk
