@@ -34,7 +34,6 @@ jobs:
 
       - name: Prepare NDK 25b & Environment
         run: |
-          # تنظيف كامل لأي ملفات تخزين مؤقت قديمة قد تسبب تضارباً
           rm -rf .buildozer
           
           mkdir -p ~/.buildozer/android/platform/
@@ -53,8 +52,8 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # تشغيل البناء بنظافة تامة
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD ERROR DETAILS ===" && tail -n 60 build.log && exit 1)
+          # تشغيل البناء، وعند أي خطأ يتم طباعة آخر 80 سطر حقيقي من سجل الأخطاء
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== EXACT BUILD ERROR ===" && tail -n 80 build.log && exit 1)
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
