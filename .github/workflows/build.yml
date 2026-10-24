@@ -31,6 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
+          pip install --upgrade python-for-android
 
       - name: Prepare NDK 25b & Setup Symlinks
         run: |
@@ -54,8 +55,8 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # تشغيل البناء وعند الفشل يتم البحث عن أسطر الخطأ الحقيقية وتجاهل متغيرات البيئة
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== REAL ERROR CAUSE ===" && grep -i -E "(error:|failed|exception)" build.log | tail -n 40 && exit 1)
+          # تشغيل البناء مع تتبع الأخطاء بدقة إن وجدت
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD FAILED ===" && grep -i -E "(error:|failed|exception)" build.log | tail -n 40 && exit 1)
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
