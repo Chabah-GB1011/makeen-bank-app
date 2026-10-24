@@ -32,7 +32,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
-          pip install --upgrade "python-for-android==2024.1.0"
+          # تثبيت أحدث نسخة متوفرة من python-for-android تلقائياً بدون تقييد برقم إصدار قديم
+          pip install --upgrade python-for-android
 
       - name: Setup Android NDK 25
         run: |
