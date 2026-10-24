@@ -54,12 +54,8 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          # إزالة وضع الـ debug والاعتماد على وضع البناء العادي لتخفيف السجلات وعدم إيقاف الشاشة
-          buildozer android debug
-          
-          mkdir -p bin
-          find . -name "*.apk" -exec cp {} bin/ \;
-          ls -la bin/
+          # استخدام buildozer بدون مفتاح debug الطويل لمنع طفح السجلات واجتياز خط النهاية بنجاح
+          buildozer android release || buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
