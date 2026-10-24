@@ -52,8 +52,14 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          # تشغيل البناء، وعند أي خطأ يتم طباعة آخر 80 سطر حقيقي من سجل الأخطاء
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== EXACT BUILD ERROR ===" && tail -n 80 build.log && exit 1)
+          # تشغيل البناء، وإذا فشل، سنقوم بفلترة السجل وطباعة أي سطر يحتوي على كلمة خطأ أو فشل حصراً
+          yes | buildozer android debug > build.log 2>&1 || {
+            echo "=============================="
+            echo "=== FAILED BUILD LOG SNIPET ==="
+            echo "=============================="
+            grep -i -C 2 -E "(error|fail|exception|stderr|warning)" build.log | tail -n 50
+            exit 1
+          }
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
