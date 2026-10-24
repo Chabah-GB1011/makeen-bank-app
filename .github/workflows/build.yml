@@ -46,10 +46,9 @@ jobs:
           ln -sf android-ndk-r25b android-ndk
           
           cd $GITHUB_WORKSPACE
-          sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec
-          sed -i 's/^#* *android.api =.*/android.api = 31/' buildozer.spec
-          sed -i 's/^#* *android.minapi =.*/android.minapi = 21/' buildozer.spec
-          sed -i 's/^#* *android.gradle_version =.*/android.gradle_version = 7.4.2/' buildozer.spec
+          # التأكد من إضافة السطور أو تعديلها بقوة
+          grep -q "android.ndk" buildozer.spec && sed -i 's/^#* *android.ndk =.*/android.ndk = 25b/' buildozer.spec || echo "android.ndk = 25b" >> buildozer.spec
+          grep -q "android.gradle_version" buildozer.spec && sed -i 's/^#* *android.gradle_version =.*/android.gradle_version = 7.4.2/' buildozer.spec || echo "android.gradle_version = 7.4.2" >> buildozer.spec
 
       - name: Build Android APK
         run: |
