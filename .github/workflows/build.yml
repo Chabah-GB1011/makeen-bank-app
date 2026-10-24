@@ -31,9 +31,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
-          pip install --upgrade "python-for-android>=2024.1.0"
 
-      - name: Prepare NDK 25b & Setup Symlinks
+      - name: Prepare NDK 25b & Environment
         run: |
           mkdir -p ~/.buildozer/android/platform/
           cd ~/.buildozer/android/platform/
@@ -44,17 +43,13 @@ jobs:
           ln -sf android-ndk-r25b android-ndk-r28c
           ln -sf android-ndk-r25b android-ndk-r20c
           ln -sf android-ndk-r25b android-ndk
-          
-          cd $GITHUB_WORKSPACE
-          # حذف أي ملفات بنية قديمة متضاربة
-          rm -rf .buildozer
 
       - name: Build Android APK
         run: |
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25b"
           
-          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD FAILED ===" && grep -i -E "(error:|failed|exception)" build.log | tail -n 50 && exit 1)
+          yes | buildozer android debug > build.log 2>&1 || (echo "=== BUILD LOG TAIL ===" && tail -n 60 build.log && exit 1)
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
