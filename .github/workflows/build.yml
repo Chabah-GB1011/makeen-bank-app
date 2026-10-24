@@ -31,7 +31,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade setuptools wheel "cython<3.0.0"
           pip install --upgrade buildozer
-          # تثبيت أحدث نسخة مستقرة من python-for-android لتوافق تام مع NDK 25 و API 31
           pip install --upgrade "python-for-android>=2024.1.0"
 
       - name: Prepare NDK 25 & Environment
@@ -55,11 +54,15 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          yes | buildozer android debug > build.log 2>&1 || {
-            echo "=============================="
-            echo "=== BUILD ERROR LOG ==="
-            echo "=============================="
-            tail -n 80 build.log
+          # تشغيل البناء مع تفعيل وضع الديباج وطباعة السجل كاملاً عند أي خطأ لتظهر المشكلة الحقيقية فوراً
+          buildozer -v android debug || {
+            echo "========================================="
+            echo "=== BUILD FAILED - FULL LOG DUMP START ==="
+            echo "========================================="
+            if [ -f build.log ]; then tail -n 120 build.log; fi
+            echo "========================================="
+            echo "=== BUILD FAILED - LOG DUMP END ===="
+            echo "========================================="
             exit 1
           }
           
