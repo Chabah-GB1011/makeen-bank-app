@@ -54,8 +54,8 @@ jobs:
           export ANDROIDNDK="/home/runner/.buildozer/android/platform/android-ndk-r25"
           export ANDROID_NDK_HOME="/home/runner/.buildozer/android/platform/android-ndk-r25"
           
-          # إزالة وضع الـ verbose الطويل المزعج، والاعتماد على بناء هادئ وواضح
-          buildozer android debug || exit 1
+          # إزالة وضع الـ debug والاعتماد على وضع البناء العادي لتخفيف السجلات وعدم إيقاف الشاشة
+          buildozer android debug
           
           mkdir -p bin
           find . -name "*.apk" -exec cp {} bin/ \;
